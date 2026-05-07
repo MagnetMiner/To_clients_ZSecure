@@ -1,0 +1,174 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+// Imports corregidos para Remix + OpenZeppelin v5
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+contract ZSecureOracle is Ownable, ReentrancyGuard, Pausable {
+    address public authorizedRelayer;
+    uint256 public requestFee;           // En wei (ETH)
+    IERC20 public feeToken;              // address(0) = ETH, sino token ERC20
+    uint256 public requestExpiry = 7 days; // Tiempo para reembolso
+
+    uint256 private _requestIds;
+
+    struct Request {
+        address requester;
+        uint256 paidAmount;
+        uint256 timestamp;
+        bool fulfilled;
+    }
+
+    mapping(uint256 => Request) public requests;
+
+    event RandomnessRequested(
+        uint256 indexed requestId,
+        address indexed requester,
+        uint256 paidAmount,
+        bool isEth
+    );
+    
+    event RandomnessDelivered(
+        uint256 indexed requestId,
+        address indexed requester,
+        bool success,
+        uint256 randomNumber
+    );
+    
+    event RequestRefunded(uint256 indexed requestId, address indexed requester, uint256 amount);
+    event FeeUpdated(uint256 newFee);
+    event RelayerUpdated(address newRelayer);
+    event FeeTokenUpdated(address newToken);
+
+    error InsufficientPayment();
+    error InvalidRequest();
+    error RequestAlreadyFulfilled();
+    error RequestNotExpired();
+    error TransferFailed();
+    error ZeroAddress();
+
+    modifier onlyRelayer() {
+        require(msg.sender == authorizedRelayer || msg.sender == owner(), "Solo relayer u owner");
+        _;
+    }
+
+    constructor(uint256 _initialFee, address _initialRelayer) Ownable(msg.sender) {
+        require(_initialRelayer != address(0), ZeroAddress());
+        requestFee = _initialFee;
+        authorizedRelayer = _initialRelayer;
+        feeToken = IERC20(address(0)); // ETH por defecto
+        _requestIds = 1;
+    }
+
+    // ==================== REQUEST ====================
+    function requestRandomNumber() external payable whenNotPaused nonReentrant returns (uint256) {
+        uint256 payment = msg.value;
+        if (address(feeToken) != address(0)) {
+            require(msg.value == 0, "Use ERC20");
+            payment = requestFee;
+            require(feeToken.transferFrom(msg.sender, address(this), payment), TransferFailed());
+        } else {
+            require(payment >= requestFee, InsufficientPayment());
+        }
+
+        uint256 requestId = _requestIds++;
+        requests[requestId] = Request({
+            requester: msg.sender,
+            paidAmount: payment,
+            timestamp: block.timestamp,
+            fulfilled: false
+        });
+
+        emit RandomnessRequested(requestId, msg.sender, payment, address(feeToken) == address(0));
+        return requestId;
+    }
+
+    // ==================== FULFILL ====================
+    function fulfillRandomNumber(
+        uint256 requestId,
+        uint256 randomNumber,
+        string calldata vrfProof
+    ) external onlyRelayer whenNotPaused nonReentrant {
+        Request storage req = requests[requestId];
+        if (req.requester == address(0) || req.fulfilled) revert InvalidRequest();
+        if (req.fulfilled) revert RequestAlreadyFulfilled();
+
+        req.fulfilled = true;
+
+        // Callback seguro con gas limitado
+        bytes memory payload = abi.encodeWithSignature(
+            "fulfillZSecureRandomness(uint256,uint256,string)",
+            requestId,
+            randomNumber,
+            vrfProof
+        );
+
+        (bool success, ) = req.requester.call{gas: 150000}(payload); // Ajustable
+
+        emit RandomnessDelivered(requestId, req.requester, success, randomNumber);
+    }
+
+    // ==================== REFUNDS ====================
+    function refundExpiredRequest(uint256 requestId) external nonReentrant {
+        Request storage req = requests[requestId];
+        if (req.requester == address(0) || req.fulfilled) revert InvalidRequest();
+        if (block.timestamp < req.timestamp + requestExpiry) revert RequestNotExpired();
+
+        uint256 amount = req.paidAmount;
+        delete requests[requestId]; // Limpieza
+
+        if (address(feeToken) == address(0)) {
+            (bool success, ) = req.requester.call{value: amount}("");
+            require(success, TransferFailed());
+        } else {
+            require(feeToken.transfer(req.requester, amount), TransferFailed());
+        }
+
+        emit RequestRefunded(requestId, req.requester, amount);
+    }
+
+    // ==================== ADMIN ====================
+    function withdrawFunds() external onlyOwner nonReentrant {
+        uint256 balance = address(this).balance;
+        if (balance > 0) {
+            (bool success, ) = owner().call{value: balance}("");
+            require(success, TransferFailed());
+        }
+
+        if (address(feeToken) != address(0)) {
+            uint256 tokenBal = feeToken.balanceOf(address(this));
+            if (tokenBal > 0) {
+                require(feeToken.transfer(owner(), tokenBal), TransferFailed());
+            }
+        }
+    }
+
+    function setFee(uint256 _newFee) external onlyOwner {
+        requestFee = _newFee;
+        emit FeeUpdated(_newFee);
+    }
+
+    function setRelayer(address _relayer) external onlyOwner {
+        require(_relayer != address(0), ZeroAddress());
+        authorizedRelayer = _relayer;
+        emit RelayerUpdated(_relayer);
+    }
+
+    function setFeeToken(address _token) external onlyOwner {
+        feeToken = IERC20(_token);
+        emit FeeTokenUpdated(_token);
+    }
+
+    function setRequestExpiry(uint256 _newExpiry) external onlyOwner {
+        requestExpiry = _newExpiry;
+    }
+
+    function pause() external onlyOwner { _pause(); }
+    function unpause() external onlyOwner { _unpause(); }
+
+    // Recibir ETH si es necesario
+    receive() external payable {}
+}

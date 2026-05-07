@@ -17,7 +17,7 @@ import "./ZSecureConsumer.sol";
 
 contract MyGame is ZSecureConsumer {
     // ⚠️ Replace with the official ZSecure Oracle Address on Base
-    constructor() ZSecureConsumer(0xYour_ZSecure_Oracle_Address_Here) {}
+    constructor() ZSecureConsumer(0xEdd63E615A2cE649b14493E520C5A567c784E6D6) {}
 }
 Step 2: Request Entropy
 Call the requestRandomNumber function provided by the parent contract. You only need to send the exact native fee required for the transaction.

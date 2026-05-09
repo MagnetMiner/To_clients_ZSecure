@@ -18,7 +18,7 @@ contract MyGame is ZSecureConsumer {
     // ⚠️ Replace with the official ZSecure Oracle Address on Base
     constructor() ZSecureConsumer(0xEdd63E615A2cE649b14493E520C5A567c784E6D6) {}
 }
----
+```
 ### Step 2: Request Entropy
 Call the requestRandomNumber function provided by the parent contract. You only need to send the exact native fee required for the transaction.
 
@@ -27,7 +27,7 @@ Call the requestRandomNumber function provided by the parent contract. You only 
         // Request a random number. The Oracle handles the rest.
         zsecureOracle.requestRandomNumber{value: 0.0001 ether}(); 
     }
----
+```
 ### Step 3: Receive and Use the Entropy
 Override the _consumeRandomness internal function. The ZSecure Relayer will automatically call this function asynchronously to deliver your pure quantum entropy.
 
@@ -38,3 +38,4 @@ Override the _consumeRandomness internal function. The ZSecure Relayer will auto
         // Your core game logic goes here!
         latestRandomResult = randomNumber;
     }
+```

@@ -59,7 +59,7 @@ curl -s -H "Authorization: Bearer ZORD-PRO-EXAMPLETOKEN" \
      http://localhost:10000/api/get_bound_entropy```
 
 ### Respuesta Estructurada (JSON)
-```bash
+JSON
 {
   "status": "success",
   "timestamp_epoch": "1781905512",
@@ -70,9 +70,3 @@ curl -s -H "Authorization: Bearer ZORD-PRO-EXAMPLETOKEN" \
   "client_timeout_safety_seconds": 30,
   "creditos_restantes": 1009988
 }
-  "pqc_signature_payload": "7071635f666970733230345f6d6c6473615f656d756c617465645f7369675f626c6f636b5f33376138313838396566663735623136",
-  "vrf_score": 99.9887,
-  "client_timeout_safety_seconds": 30,
-  "remaining_credits": 1009988
-}
-```

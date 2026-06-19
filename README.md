@@ -5,6 +5,11 @@
 [![Security](https://img.shields.io/badge/Cryptography-Post--Quantum%20%28PQC%29-green.svg)](#)
 [![Architecture](https://img.shields.io/badge/Architecture-Thread--Isolated%20Zeroization-orange.svg)](#)
 
+## 🚀 Live on Base Mainnet
+The ZSecure Oracle Coordinator is fully deployed and operational on Base Mainnet.
+* **Coordinator Contract Address:** `0xTuDireccionDeContratoAqui`
+* **Basescan Link:** [Verify on Basescan](https://basescan.org/address/0xTuDireccionDeContratoAqui)
+
 **ZSecure Engine** es un framework criptográfico distribuido de alto rendimiento diseñado para la generación, validación y distribución de secuencias numéricas aleatorias de alta entropía (True Random Number Generation - TRNG) y blindaje asíncrono post-cuántico (PQC). 
 
 Desarrollado bajo una arquitectura híbrida acoplada multicapa por **ZORD SpA**, el motor combina la velocidad computacional de núcleos binarios nativos en **C++** con proxies perimetrales redundantes de baja latencia. El sistema mitiga activamente el determinismo destructivo introducido por hipervisores en la nube y blinda las comunicaciones críticas contra adversarios cuánticos.

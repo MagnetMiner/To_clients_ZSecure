@@ -6,9 +6,17 @@
 [![Architecture](https://img.shields.io/badge/Architecture-Thread--Isolated%20Zeroization-orange.svg)](#)
 
 ## 🚀 Live on Base Mainnet
-The ZSecure Oracle Coordinator is fully deployed and operational on Base Mainnet.
-* **Coordinator Contract Address:** `0xTuDireccionDeContratoAqui`
-* **Basescan Link:** [Verify on Basescan](https://basescan.org/address/0xTuDireccionDeContratoAqui)
+
+The ZSecure Oracle Coordinator is fully deployed, verified, and operational on Base Mainnet. Developers can integrate quantum-resistant entropy into their decentralized applications immediately.
+
+* **Oracle Coordinator Address:** `0xEdd63E615A2cE649b14493E520C5A567c784E6D6`
+* **Block Explorer:** [View and Verify on Basescan](https://basescan.org/address/0xEdd63E615A2cE649b14493E520C5A567c784E6D6)
+
+### Integration Quickstart
+To hook your dApp into the ZSecure infrastructure, pass our Mainnet Coordinator address into your contract's constructor:
+
+```solidity
+constructor() ZSecureConsumer(0xEdd63E615A2cE649b14493E520C5A567c784E6D6) {}
 
 **ZSecure Engine** es un framework criptográfico distribuido de alto rendimiento diseñado para la generación, validación y distribución de secuencias numéricas aleatorias de alta entropía (True Random Number Generation - TRNG) y blindaje asíncrono post-cuántico (PQC). 
 

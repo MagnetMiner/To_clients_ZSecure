@@ -50,14 +50,6 @@ En entornos virtualizados (AWS EC2, Azure, GCP), el aislamiento del hipervisor d
 
 El motor expone endpoints criptográficos de alta velocidad que retornan payloads estructurados auto-verificables on-chain u off-chain:
 
-### Ejemplo de Solicitud (curl)
-```bash
-curl -s -H "Authorization: Bearer ZORD-PRO-EXAMPLETOKEN" \
-     -H "Content-Type: application/json" \
-     -H "X-ZSecure-RequestId: 123456" \
-     -H "X-ZSecure-ChainId: 1" \
-     http://localhost:10000/api/get_bound_entropy
-
 ### Respuesta Estructurada (JSON)
 ```bash
 JSON
@@ -71,3 +63,11 @@ JSON
   "client_timeout_safety_seconds": 30,
   "creditos_restantes": 1009988
 }
+
+### Ejemplo de Solicitud (curl)
+```bash
+curl -s -H "Authorization: Bearer ZORD-PRO-EXAMPLETOKEN" \
+     -H "Content-Type: application/json" \
+     -H "X-ZSecure-RequestId: 123456" \
+     -H "X-ZSecure-ChainId: 1" \
+     http://localhost:10000/api/get_bound_entropy
